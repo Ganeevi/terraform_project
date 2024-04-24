@@ -115,6 +115,16 @@ resource "aws_instance" "jenkins-master" {
         destination = "/home/ec2-user/jenkins-master.sh"
     }
 
+    provisioner "file" {
+        source = "scripts/id_rsa.pub"
+        destination = "/home/ec2-user/id_rsa.pub"
+    }
+
+    provisioner "file" {
+        source = "scripts/id_rsa"
+        destination = "/home/ec2-user/id_rsa"
+    }
+
     provisioner "remote-exec" {
         inline = [
             "echo 'Installing required packages'",
@@ -128,7 +138,14 @@ resource "aws_instance" "jenkins-master" {
             
 			// Execute both files one-by-one
 			"sudo sh /home/ec2-user/user_creation.sh",
-			"sudo sh /home/ec2-user/jenkins-master.sh"
+			"sudo sh /home/ec2-user/jenkins-master.sh",
+
+            // for user "ansible"
+            "sudo mkdir -p /home/ansible/.ssh",
+            "sudo mv id_rsa id_rsa.pub /home/ansible/.ssh",
+            "sudo chown ansible:ansible -R /home/ansible/.ssh/",
+            "sudo chmod 0600 /home/ansible/.ssh/id_rsa",
+            "sudo chmod 0644 /home/ansible/.ssh/id_rsa.pub"
         ]
     }
 }
@@ -152,6 +169,11 @@ resource "aws_instance" "jenkins-slave" {
         source = "scripts/user_creation.sh"
         destination = "/home/ec2-user/user_creation.sh"
 	}
+    
+    provisioner "file" {
+        source = "scripts/id_rsa.pub"
+        destination = "/home/ec2-user/id_rsa.pub"
+    }
 
 	provisioner "file" {
         source = "scripts/jenkins-slave.sh"
@@ -172,6 +194,12 @@ resource "aws_instance" "jenkins-slave" {
 			// Execute both files one-by-one
 			"sudo sh /home/ec2-user/user_creation.sh",
 			"sudo sh /home/ec2-user/jenkins-slave.sh",
+
+            // for user "ansible"
+            "sudo mkdir -p /home/ansible/.ssh",
+            "sudo mv id_rsa.pub /home/ansible/.ssh/authorized_keys",
+            "sudo chown ansible:ansible -R /home/ansible/.ssh/",
+            "sudo chmod 0600 /home/ansible/.ssh/authorized_keys"
         ]
     }
 }
