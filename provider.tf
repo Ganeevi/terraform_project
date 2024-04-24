@@ -1,3 +1,3 @@
 provider "aws" {
-    region = "ap-south-1"
+  region = lookup(var.aws_region, terraform.workspace, "ap-south-1")
 }
