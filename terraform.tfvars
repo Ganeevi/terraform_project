@@ -1,9 +1,1 @@
-vpc_cidr = "10.0.0.0/16"
-AMI_id = "ami-0451f2687182e0411"
-subnet_cidr-1a = "10.0.10.0/24"
-subnet_cidr-1b = "10.0.20.0/24"
-AZ-1a = "ap-south-1a"
-AZ-1b = "ap-south-1b"
-repository_name = "myrepo1"
-instance_type-Jenkins = "t2.micro"
-instance_type-jfrog = "t2.medium"
+
