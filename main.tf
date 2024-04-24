@@ -3,49 +3,52 @@ resource "aws_ecr_repository" "this" {
 }
 
 resource "aws_vpc" "myVPC" {
-    cidr_block = var.vpc_cidr
-    tags = { Name = "myVPC" }  
+    tags = { Name = "myVPC" }
+    cidr_block = lookup(var.vpc_cidr, terraform.workspace, "10.0.0.0/16")
 }
 
 resource "aws_internet_gateway" "myIGW" {
+    tags = { Name = "myIGW" }
     vpc_id = aws_vpc.myVPC.id
-    tags = { Name = "myIGW"}
 }
 
-resource "aws_subnet" "Public-Subnet-1a" {
+resource "aws_subnet" "Public-Subnet-1" {
+    tags = { Name = "Public-Subnet-1" }
     vpc_id = aws_vpc.myVPC.id
-    cidr_block = var.subnet_cidr-1a
-    availability_zone = var.AZ-1a
-    tags = { Name = "Public-Subnet-1a"}
+    availability_zone = lookup(var.Public-Subnet-1, terraform.workspace, "ap-south-1a")
+    map_public_ip_on_launch = true
+    cidr_block = lookup(var.subnet-1_cidr, terraform.workspace, "10.0.10.0/24")
 }
 
-resource "aws_subnet" "Public-Subnet-1b" {
+resource "aws_subnet" "Public-Subnet-2" {
+    tags = { Name = "Public-Subnet-2" }
     vpc_id = aws_vpc.myVPC.id
-    cidr_block = var.subnet_cidr-1b
-    availability_zone = var.AZ-1b
-    tags = { Name = "Public-Subnet-1b"}
+    availability_zone = lookup(var.Public-Subnet-2, terraform.workspace, "ap-south-1b")
+    map_public_ip_on_launch = true
+    cidr_block = lookup(var.subnet-2_cidr, terraform.workspace, "10.0.20.0/24")
 }
 
-resource "aws_route_table" "myPublic_RT" {
-    tags = { Name = "Public-RT"}
+resource "aws_route_table" "Public-RT" {
+    tags = { Name = "Public-RT" }
     vpc_id = aws_vpc.myVPC.id
     route {
-        cidr_block = "0.0.0.0/0"
         gateway_id = aws_internet_gateway.myIGW.id
+        cidr_block = "0.0.0.0/0"
     }
 }
 
-resource "aws_route_table_association" "Public-RT-Asso-1a" {
-    route_table_id = aws_route_table.myPublic_RT.id
-    subnet_id = aws_subnet.Public-Subnet-1a.id
+resource "aws_route_table_association" "public-rt-asso" {
+    subnet_id = aws_subnet.Public-Subnet-1.id
+    route_table_id = aws_route_table.Public-RT.id
 }
 
-resource "aws_route_table_association" "Public-RT-Asso-1b" {
-    route_table_id = aws_route_table.myPublic_RT.id
-    subnet_id = aws_subnet.Public-Subnet-1b.id
+resource "aws_route_table_association" "public-rt-asso-2" {
+    subnet_id = aws_subnet.Public-Subnet-2.id
+    route_table_id = aws_route_table.Public-RT.id
 }
 
-resource "aws_security_group" "Web-SG" {
+resource "aws_security_group" "web-SG" {
+    tags = { Name = "web-sg" }
     vpc_id = aws_vpc.myVPC.id
     ingress {
         from_port = 22
@@ -64,7 +67,12 @@ resource "aws_security_group" "Web-SG" {
         to_port = 0
         protocol = "-1"
         cidr_blocks = ["0.0.0.0/0"]
-    }
+    }  
+}
+
+resource "aws_key_pair" "web-key" {
+    tags = { Name = "web-key" }
+    public_key = file("~/.ssh/id_rsa.pub")  
 }
 
 /*resource "aws_s3_bucket" "myS3" {
@@ -82,54 +90,92 @@ resource "aws_dynamodb_table" "mytable" {
   }
 }
 
-resource "aws_instance" "Master" {
-        ami = var.AMI_id
-        instance_type = var.instance_type-Jenkins
-        key_name = "Mumbai"
-        subnet_id = "${aws_subnet.Public-Subnet-1a.id}"
-        vpc_security_group_ids = [ aws_security_group.Web-SG.id ]
-        associate_public_ip_address = "true"
-        tags = { Name = "Jenkins-Master" }
-        user_data = "${file("package_script/package.sh")}"
-        user_data_replace_on_change = "true"
+resource "aws_instance" "jenkins-master" {
+    tags = { Name = "jenkins-master" }
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
+    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    security_groups = [ aws_security_group.web-SG.id ]
+    subnet_id = aws_subnet.Public-Subnet-1.id
+    key_name = aws_key_pair.web-key.id
+
+    connection {
+        type = "ssh"
+        host = self.public_ip
+        user = "ec2-user"
+        private_key = file("~/.ssh/id_rsa")
+    }
+
+    provisioner "file" {
+        source = "scripts/user_creation.sh"
+        destination = "/home/ec2-user/user_creation.sh"
+	}
+	
+	provisioner "file" {
+        source = "scripts/jenkins-master.sh"
+        destination = "/home/ec2-user/jenkins-master.sh"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "echo 'Installing required packages'",
+            "sudo yum install dos2unix -y",
+            
+			// dos2unix for both files
+			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-master.sh",
+            
+			// chmod +x to both files
+			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-master.sh",
+            
+			// Execute both files one-by-one
+			"sudo sh /home/ec2-user/user_creation.sh",
+			"sudo sh /home/ec2-user/jenkins-master.sh"
+        ]
+    }
 }
 
-resource "aws_instance" "Slave" {
-        ami = var.AMI_id
-        instance_type = var.instance_type-Jenkins
-        key_name = "Mumbai"
-        count = 2
-        subnet_id = "${aws_subnet.Public-Subnet-1b.id}"
-        vpc_security_group_ids = [ aws_security_group.Web-SG.id ]
-        associate_public_ip_address = "true"
-        tags = { Name = "Jenkins-Slave" }
-        user_data = "${file("package_script/slave_package.sh")}"
-        user_data_replace_on_change = "true"
+resource "aws_instance" "jenkins-slave" {
+    tags = { Name = "jenkins-slave" }
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
+    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    security_groups = [ aws_security_group.web-SG.id ]
+    subnet_id = aws_subnet.Public-Subnet-2.id
+    key_name = aws_key_pair.web-key.id
+
+    connection {
+        type = "ssh"
+        host = self.public_ip
+        user = "ec2-user"
+        private_key = file("~/.ssh/id_rsa")
+    }
+	
+	provisioner "file" {
+        source = "scripts/user_creation.sh"
+        destination = "/home/ec2-user/user_creation.sh"
+	}
+
+	provisioner "file" {
+        source = "scripts/jenkins-slave.sh"
+        destination = "/home/ec2-user/jenkins-slave.sh"
+	}
+	
+	provisioner "remote-exec" {
+        inline = [
+            "echo 'Installing required packages'",
+            "sudo yum install dos2unix -y",
+            
+			// dos2unix for both files
+			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-slave.sh /home/ec2-user/authorized_keys",
+            
+			// chmod +x to both files
+			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-slave.sh",
+            
+			// Execute both files one-by-one
+			"sudo sh /home/ec2-user/user_creation.sh",
+			"sudo sh /home/ec2-user/jenkins-slave.sh",
+        ]
+    }
 }
 
-resource "aws_instance" "jfrog-artifactory" {
-        ami = var.AMI_id
-        instance_type = var.instance_type-jfrog
-        key_name = "Mumbai"
-        count = 1
-        subnet_id = "${aws_subnet.Public-Subnet-1b.id}"
-        vpc_security_group_ids = [ aws_security_group.Web-SG.id ]
-        associate_public_ip_address = "true"
-        tags = { Name = "jfrog-artifactory" }
-        user_data = "${file("package_script/jfrog.sh")}"
-        user_data_replace_on_change = "true"
-}
-
-output "public_ip_Master" {
-    value = aws_instance.Master.public_ip
-}
-output "private_ip_Master" {
-    value = aws_instance.Master.private_ip
-}
-
-output "public_ip_Slave" {
-    value = aws_instance.Slave.*.public_ip
-}
-output "private_ip_Slave" {
-    value = aws_instance.Slave.*.private_ip
+output "public_ip" {
+    value = [ aws_instance.jenkins-master.public_ip, aws_instance.jenkins-slave.public_ip ]
 }
