@@ -43,8 +43,8 @@ resource "aws_route_table_association" "public-rt-asso-2" {
     route_table_id = aws_route_table.Public-RT.id
 }
 
-resource "aws_security_group" "web-SG" {
-    tags = { Name = "web-sg" }
+resource "aws_security_group" "ssh" {
+    tags = { Name = "ssh-enabled" }
     vpc_id = aws_vpc.myVPC.id
     ingress {
         from_port = 22
@@ -52,7 +52,18 @@ resource "aws_security_group" "web-SG" {
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
-    ingress {
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }  
+}
+
+resource "aws_security_group" "web-SG" {
+    tags = { Name = "URL Access" }
+    vpc_id = aws_vpc.myVPC.id
+ingress {
         from_port = 8080
         to_port = 8080
         protocol = "tcp"
@@ -94,7 +105,7 @@ resource "aws_instance" "jenkins-master" {
     tags = { Name = "jenkins-master" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.web-SG.id ]
+    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
     key_name = aws_key_pair.web-key.id
 
@@ -154,7 +165,7 @@ resource "aws_instance" "jenkins-slave" {
     tags = { Name = "jenkins-slave" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.web-SG.id ]
+    security_groups = [ aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     key_name = aws_key_pair.web-key.id
 
@@ -202,8 +213,4 @@ resource "aws_instance" "jenkins-slave" {
             "sudo chmod 0600 /home/ansible/.ssh/authorized_keys"
         ]
     }
-}
-
-output "public_ip" {
-    value = [ aws_instance.jenkins-master.public_ip, aws_instance.jenkins-slave.public_ip ]
 }
