@@ -1,7 +1,3 @@
-resource "aws_ecr_repository" "this" {
-  name = var.repository_name
-}
-
 resource "aws_vpc" "myVPC" {
     tags = { Name = "myVPC" }
     cidr_block = lookup(var.vpc_cidr, terraform.workspace, "10.0.0.0/16")
@@ -75,9 +71,13 @@ resource "aws_key_pair" "web-key" {
     public_key = file("~/.ssh/id_rsa.pub")  
 }
 
-/*resource "aws_s3_bucket" "myS3" {
+/*resource "aws_ecr_repository" "this" {
+  name = repository_name_yuy
+}
+
+resource "aws_s3_bucket" "myS3" {
     bucket = "terraform-init-april-training"
-}*/
+}
 
 resource "aws_dynamodb_table" "mytable" {
   name = "terraform-lock"
@@ -88,7 +88,7 @@ resource "aws_dynamodb_table" "mytable" {
     name = "LockID"
     type = "S"
   }
-}
+}*/
 
 resource "aws_instance" "jenkins-master" {
     tags = { Name = "jenkins-master" }
