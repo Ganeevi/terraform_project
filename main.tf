@@ -101,6 +101,7 @@ resource "aws_dynamodb_table" "mytable" {
   }
 }*/
 
+//Jenkins-Master
 resource "aws_instance" "jenkins-master" {
     tags = { Name = "jenkins-master" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
@@ -138,34 +139,26 @@ resource "aws_instance" "jenkins-master" {
 
     provisioner "remote-exec" {
         inline = [
-            "echo 'Installing required packages'",
+            // Installing required packages
             "sudo yum install dos2unix -y",
             
-			// dos2unix for both files
+			// Changing Permissions
 			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-master.sh",
-            
-			// chmod +x to both files
 			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-master.sh",
             
 			// Execute both files one-by-one
 			"sudo sh /home/ec2-user/user_creation.sh",
-			"sudo sh /home/ec2-user/jenkins-master.sh",
-
-            // for user "ansible"
-            "sudo mkdir -p /home/ansible/.ssh",
-            "sudo mv id_rsa id_rsa.pub /home/ansible/.ssh",
-            "sudo chown ansible:ansible -R /home/ansible/.ssh/",
-            "sudo chmod 0600 /home/ansible/.ssh/id_rsa",
-            "sudo chmod 0644 /home/ansible/.ssh/id_rsa.pub"
+			"sudo sh /home/ec2-user/jenkins-master.sh"
         ]
     }
 }
 
+// Jenkins-Slave
 resource "aws_instance" "jenkins-slave" {
     tags = { Name = "jenkins-slave" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.ssh.id ]
+    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     key_name = aws_key_pair.web-key.id
 
@@ -175,42 +168,139 @@ resource "aws_instance" "jenkins-slave" {
         user = "ec2-user"
         private_key = file("~/.ssh/id_rsa")
     }
-	
-	provisioner "file" {
+
+    provisioner "file" {
         source = "scripts/user_creation.sh"
         destination = "/home/ec2-user/user_creation.sh"
 	}
-    
+	
+	provisioner "file" {
+        source = "scripts/jenkins-slave.sh"
+        destination = "/home/ec2-user/jenkins-slave.sh"
+    }
+
     provisioner "file" {
         source = "scripts/id_rsa.pub"
         destination = "/home/ec2-user/id_rsa.pub"
     }
 
-	provisioner "file" {
-        source = "scripts/jenkins-slave.sh"
-        destination = "/home/ec2-user/jenkins-slave.sh"
-	}
-	
-	provisioner "remote-exec" {
+    provisioner "file" {
+        source = "scripts/id_rsa"
+        destination = "/home/ec2-user/id_rsa"
+    }
+
+    provisioner "remote-exec" {
         inline = [
-            "echo 'Installing required packages'",
+            // Installing required packages
             "sudo yum install dos2unix -y",
             
-			// dos2unix for both files
-			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-slave.sh /home/ec2-user/authorized_keys",
-            
-			// chmod +x to both files
+			// Changing Permissions
+			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-slave.sh",
 			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-slave.sh",
             
 			// Execute both files one-by-one
 			"sudo sh /home/ec2-user/user_creation.sh",
-			"sudo sh /home/ec2-user/jenkins-slave.sh",
+			"sudo sh /home/ec2-user/jenkins-slave.sh"
+        ]
+    }
+}
 
-            // for user "ansible"
-            "sudo mkdir -p /home/ansible/.ssh",
-            "sudo mv id_rsa.pub /home/ansible/.ssh/authorized_keys",
-            "sudo chown ansible:ansible -R /home/ansible/.ssh/",
-            "sudo chmod 0600 /home/ansible/.ssh/authorized_keys"
+// Ansible-Controller-Machine
+resource "aws_instance" "ansible-CM" {
+    tags = { Name = "ansible-CM" }
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
+    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
+    subnet_id = aws_subnet.Public-Subnet-1.id
+    key_name = aws_key_pair.web-key.id
+
+    connection {
+        type = "ssh"
+        host = self.public_ip
+        user = "ec2-user"
+        private_key = file("~/.ssh/id_rsa")
+    }
+
+    provisioner "file" {
+        source = "scripts/user_creation.sh"
+        destination = "/home/ec2-user/user_creation.sh"
+	}
+	
+	provisioner "file" {
+        source = "scripts/ansible-CM.sh"
+        destination = "/home/ec2-user/ansible-CM.sh"
+    }
+
+    provisioner "file" {
+        source = "scripts/id_rsa.pub"
+        destination = "/home/ec2-user/id_rsa.pub"
+    }
+
+    provisioner "file" {
+        source = "scripts/id_rsa"
+        destination = "/home/ec2-user/id_rsa"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            // Installing required packages
+            "sudo yum install dos2unix -y",
+            
+			// Changing Permissions
+			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/ansible-CM.sh",
+			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/ansible-CM.sh",
+            
+			// Execute both files one-by-one
+			"sudo sh /home/ec2-user/user_creation.sh",
+			"sudo sh /home/ec2-user/ansible-CM.sh"
+        ]
+    }
+}
+
+// Ansible Node
+resource "aws_instance" "ansible-node" {
+    tags = { Name = "ansible-node" }
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
+    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
+    subnet_id = aws_subnet.Public-Subnet-2.id
+    key_name = aws_key_pair.web-key.id
+
+    connection {
+        type = "ssh"
+        host = self.public_ip
+        user = "ec2-user"
+        private_key = file("~/.ssh/id_rsa")
+    }
+
+    provisioner "file" {
+        source = "scripts/user_creation.sh"
+        destination = "/home/ec2-user/user_creation.sh"
+	}
+
+    provisioner "file" {
+        source = "scripts/id_rsa.pub"
+        destination = "/home/ec2-user/id_rsa.pub"
+    }
+
+    provisioner "file" {
+        source = "scripts/id_rsa"
+        destination = "/home/ec2-user/id_rsa"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            // Installing required packages
+            "sudo yum install dos2unix -y",
+            
+			// Changing Permissions
+			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/ansible-node.sh",
+			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/ansible-node.sh",
+            
+			// Execute both files one-by-one
+			"sudo sh /home/ec2-user/user_creation.sh",
+			"sudo sh /home/ec2-user/ansible-node.sh",
+            "sudo hostnamectl set-hostname ansible-node"
         ]
     }
 }
