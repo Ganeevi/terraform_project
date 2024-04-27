@@ -84,14 +84,14 @@ resource "aws_key_pair" "web-key" {
 
 /*resource "aws_ecr_repository" "this" {
   name = repository_name_yuy
-}
+}*/
 
 resource "aws_s3_bucket" "myS3" {
-    bucket = "terraform-init-april-training"
+    bucket = "grewall-s3-demo-xyz" //change accordingly
 }
 
 resource "aws_dynamodb_table" "mytable" {
-  name = "terraform-lock"
+  name = "my_table_format"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "LockID"
 
@@ -99,7 +99,7 @@ resource "aws_dynamodb_table" "mytable" {
     name = "LockID"
     type = "S"
   }
-}*/
+}
 
 //Jenkins-Master
 resource "aws_instance" "jenkins-master" {
