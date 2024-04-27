@@ -79,7 +79,7 @@ ingress {
 
 resource "aws_key_pair" "web-key" {
     tags = { Name = "web-key" }
-    public_key = file("~/.ssh/id_rsa.pub")  
+    public_key = file("~/.ssh/id_rsa.pub")
 }
 
 /*resource "aws_ecr_repository" "this" {
