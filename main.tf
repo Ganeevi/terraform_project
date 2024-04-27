@@ -87,11 +87,11 @@ resource "aws_key_pair" "web-key" {
 }*/
 
 resource "aws_s3_bucket" "myS3" {
-    bucket = "grewall-s3-demo-xyz" //change accordingly
+    bucket = "practicing-jenkins-with-terraform" //change accordingly
 }
 
 resource "aws_dynamodb_table" "mytable" {
-  name = "my_table_format"
+  name = "terraform_lock1"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "LockID"
 
