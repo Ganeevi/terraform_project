@@ -110,7 +110,7 @@ resource "aws_instance" "jenkins-master" {
     security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
     key_name = aws_key_pair.web-key.id
-
+    iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
     connection {
         type = "ssh"
         host = self.public_ip
@@ -154,7 +154,7 @@ resource "aws_instance" "jenkins-master" {
         ]
     }
 }
-
+/*
 // Jenkins-Slave
 resource "aws_instance" "jenkins-slave" {
     tags = { Name = "jenkins-slave" }
@@ -163,6 +163,7 @@ resource "aws_instance" "jenkins-slave" {
     security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     key_name = aws_key_pair.web-key.id
+    iam_instance_profile = aws_iam_role.ec2-role.id
 
     connection {
         type = "ssh"
@@ -308,4 +309,4 @@ resource "aws_instance" "ansible-node" {
             "sudo hostnamectl set-hostname ansible-node"
         ]
     }
-}
+}*/
