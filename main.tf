@@ -79,8 +79,8 @@ ingress {
 
 resource "aws_key_pair" "web-key" {
     tags = { Name = "web-key" }
-    // public_key = file("scripts/id_rsa.pub")		// for Executing from within AWS
-    public_key = file("~/.ssh/id_rsa.pub")		    // for local/laptop
+    public_key = file("scripts/id_rsa.pub")		// for Executing from within AWS
+    //public_key = file("~/.ssh/id_rsa.pub")		    // for local/laptop
 }
 
 /*resource "aws_ecr_repository" "this" {
@@ -115,8 +115,8 @@ resource "aws_instance" "jenkins-master" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-        // private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    private_key = file("~/.ssh/id_rsa")		    // for local/laptop
+        private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	    //private_key = file("~/.ssh/id_rsa")		    // for local/laptop
     }
 
     provisioner "file" {
