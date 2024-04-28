@@ -163,7 +163,7 @@ resource "aws_instance" "jenkins-slave" {
     security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     key_name = aws_key_pair.web-key.id
-    iam_instance_profile = aws_iam_role.ec2-role.id
+    iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
 
     connection {
         type = "ssh"
