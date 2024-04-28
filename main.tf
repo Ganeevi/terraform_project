@@ -156,7 +156,7 @@ resource "aws_instance" "jenkins-master" {
 }
 
 // Jenkins-Slave
-/*resource "aws_instance" "jenkins-slave" {
+resource "aws_instance" "jenkins-slave" {
     tags = { Name = "jenkins-slave" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
@@ -168,8 +168,8 @@ resource "aws_instance" "jenkins-master" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-       	// private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    private_key = file("~/.ssh/id_rsa")		    // for local/laptop
+       	private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	    // private_key = file("~/.ssh/id_rsa")		    // for local/laptop
 }
 
     provisioner "file" {
@@ -221,8 +221,8 @@ resource "aws_instance" "ansible-CM" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-        // private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    private_key = file("~/.ssh/id_rsa")		    // for local/laptop
+        private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	    // private_key = file("~/.ssh/id_rsa")		    // for local/laptop
 }
 
     provisioner "file" {
@@ -274,8 +274,8 @@ resource "aws_instance" "ansible-node" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-	    // private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    private_key = file("~/.ssh/id_rsa")	    	// for local/laptop
+	    private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	    // private_key = file("~/.ssh/id_rsa")	    	// for local/laptop
     }
 
     provisioner "file" {
@@ -308,4 +308,4 @@ resource "aws_instance" "ansible-node" {
             "sudo hostnamectl set-hostname ansible-node"
         ]
     }
-}*/
+}
