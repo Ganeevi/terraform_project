@@ -79,12 +79,13 @@ ingress {
 
 resource "aws_key_pair" "web-key" {
     tags = { Name = "web-key" }
-    public_key = file("scripts/id_rsa.pub")
+    // public_key = file("scripts/id_rsa.pub")		// for Executing from within AWS
+    public_key = file("~/.ssh/id_rsa.pub")		// for local/laptop
 }
 
 /*resource "aws_ecr_repository" "this" {
   name = repository_name_yuy
-}*/
+}
 
 resource "aws_s3_bucket" "myS3" {
     bucket = "practicing-jenkins-with-terraform" //change accordingly
@@ -99,7 +100,7 @@ resource "aws_dynamodb_table" "mytable" {
     name = "LockID"
     type = "S"
   }
-}
+}*/
 
 //Jenkins-Master
 resource "aws_instance" "jenkins-master" {
@@ -114,7 +115,8 @@ resource "aws_instance" "jenkins-master" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-        private_key = file("scripts/id_rsa")
+        // private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	private_key = file("~/.ssh/id_rsa")		// for local/laptop
     }
 
     provisioner "file" {
@@ -166,8 +168,9 @@ resource "aws_instance" "jenkins-slave" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-        private_key = file("scripts/id_rsa")
-    }
+   	// private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	private_key = file("~/.ssh/id_rsa")		// for local/laptop
+}
 
     provisioner "file" {
         source = "scripts/user_creation.sh"
@@ -218,8 +221,9 @@ resource "aws_instance" "ansible-CM" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-        private_key = file("scripts/id_rsa")
-    }
+        // private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	private_key = file("~/.ssh/id_rsa")		// for local/laptop
+}
 
     provisioner "file" {
         source = "scripts/user_creation.sh"
@@ -270,7 +274,8 @@ resource "aws_instance" "ansible-node" {
         type = "ssh"
         host = self.public_ip
         user = "ec2-user"
-        private_key = file("scripts/id_rsa")
+	// private_key = file("scripts/id_rsa")		// for Executing from within AWS
+	private_key = file("~/.ssh/id_rsa")		// for local/laptop
     }
 
     provisioner "file" {
