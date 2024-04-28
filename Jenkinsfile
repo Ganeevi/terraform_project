@@ -2,11 +2,6 @@ pipeline {
     agent any
     
     stages {
-        stage('hello') {
-            steps {
-                sh 'echo "Hello-world"'
-            }
-        }
         stage ('Compile') {
             steps {
                 git branch: 'main', url: 'https://github.com/Ganeevi/terraform_project.git'
