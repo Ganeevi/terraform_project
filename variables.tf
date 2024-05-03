@@ -68,12 +68,22 @@ variable "instance_type" {
     }
 }
 
-variable "ami_id" {
+variable "ami_id_amazon-linux-2" {
     description = "value"
     type = map(string)
     default = {
       "dev" = "ami-060f2cb962e997969"
       "stage" = "ami-04e0b6d6cfa432943"
       "prod" = "ami-0a1179631ec8933d7"
+    }
+}
+
+variable "ami_ubuntu" {
+    description = "value"
+    type = map(string)
+    default = {
+      "dev" = "ami-05e00961530ae1b55"
+      "stage" = "ami-0595d6e81396a9efb"
+      "prod" = "ami-0e001c9271cf7f3b9"
     }
 }

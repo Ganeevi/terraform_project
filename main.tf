@@ -140,7 +140,7 @@ resource "aws_dynamodb_table" "mytable" {
 resource "aws_instance" "jenkins-master" {
     tags = { Name = "jenkins-master" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
-    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
     security_groups = [ aws_security_group.Jenkins-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
     user_data = "${file("scripts/jenkins-master.sh")}"
@@ -153,7 +153,7 @@ resource "aws_instance" "jenkins-master" {
 resource "aws_instance" "jenkins-slave" {
     tags = { Name = "jenkins-slave" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
-    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
     security_groups = [ aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     key_name = "Mumbai"
@@ -166,7 +166,7 @@ resource "aws_instance" "jenkins-slave" {
 resource "aws_instance" "ansible-CM" {
     tags = { Name = "ansible-CM" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
-    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
     security_groups = [ aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
     user_data = "${file("scripts/ansible-CM.sh")}"
@@ -179,7 +179,7 @@ resource "aws_instance" "ansible-CM" {
 resource "aws_instance" "ansible-node" {
     tags = { Name = "ansible-node" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
-    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
     security_groups = [ aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     user_data = "${file("scripts/ansible-CM.sh")}"
@@ -191,7 +191,7 @@ resource "aws_instance" "ansible-node" {
 resource "aws_instance" "NexusServer" {
     tags = { Name = "Nexus-Server" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
-    ami = "ami-060f2cb962e997969"   // Centos 7
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
     security_groups = [ aws_security_group.ssh.id, aws_security_group.Nexus-SG.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     user_data = "${file("scripts/nexus-setup.sh")}"
@@ -203,7 +203,7 @@ resource "aws_instance" "NexusServer" {
 resource "aws_instance" "Sonar-Server" {
     tags = { Name = "Sonar-Server" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
-    ami = "ami-05e00961530ae1b55"   // Ubuntu 22
+    ami = lookup(var.ami_ubuntu , terraform.workspace, "ami-05e00961530ae1b55")   // Ubuntu 22
     security_groups = [ aws_security_group.ssh.id, aws_security_group.Sonar-SG.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     user_data = "${file("scripts/sonar-setup.sh")}"
