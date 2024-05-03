@@ -60,8 +60,8 @@ resource "aws_security_group" "ssh" {
     }  
 }
 
-resource "aws_security_group" "web-SG" {
-    tags = { Name = "URL Access" }
+resource "aws_security_group" "Jenkins-SG" {
+    tags = { Name = "Jenkins-SG" }
     vpc_id = aws_vpc.myVPC.id
 ingress {
         from_port = 8080
@@ -77,13 +77,47 @@ ingress {
     }  
 }
 
-resource "aws_key_pair" "web-key" {
+resource "aws_security_group" "Nexus-SG" {
+    tags = { Name = "Nexus-SG" }
+    vpc_id = aws_vpc.myVPC.id
+ingress {
+        from_port = 8081
+        to_port = 8081
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }  
+}
+
+resource "aws_security_group" "Sonar-SG" {
+    tags = { Name = "Sonar-SG" }
+    vpc_id = aws_vpc.myVPC.id
+ingress {
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }  
+}
+
+/*resource "aws_key_pair" "web-key" {
     tags = { Name = "web-key" }
     public_key = file("scripts/id_rsa.pub")		// for Executing from within AWS
     //public_key = file("~/.ssh/id_rsa.pub")		    // for local/laptop
 }
 
-/*resource "aws_ecr_repository" "this" {
+resource "aws_ecr_repository" "this" {
   name = repository_name_yuy
 }
 
@@ -105,54 +139,14 @@ resource "aws_dynamodb_table" "mytable" {
 //Jenkins-Master
 resource "aws_instance" "jenkins-master" {
     tags = { Name = "jenkins-master" }
-    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
+    security_groups = [ aws_security_group.Jenkins-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
-    key_name = aws_key_pair.web-key.id
-    iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
-    connection {
-        type = "ssh"
-        host = self.public_ip
-        user = "ec2-user"
-        private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    //private_key = file("~/.ssh/id_rsa")		    // for local/laptop
-    }
-
-    provisioner "file" {
-        source = "scripts/user_creation.sh"
-        destination = "/home/ec2-user/user_creation.sh"
-	}
-	
-	provisioner "file" {
-        source = "scripts/jenkins-master.sh"
-        destination = "/home/ec2-user/jenkins-master.sh"
-    }
-
-    provisioner "file" {
-        source = "scripts/id_rsa.pub"
-        destination = "/home/ec2-user/id_rsa.pub"
-    }
-
-    provisioner "file" {
-        source = "scripts/id_rsa"
-        destination = "/home/ec2-user/id_rsa"
-    }
-
-    provisioner "remote-exec" {
-        inline = [
-            // Installing required packages
-            "sudo yum install dos2unix -y",
-            
-			// Changing Permissions
-			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-master.sh",
-			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-master.sh",
-            
-			// Execute both files one-by-one
-			"sudo sh /home/ec2-user/user_creation.sh",
-			"sudo sh /home/ec2-user/jenkins-master.sh"
-        ]
-    }
+    user_data = "${file("scripts/jenkins-master.sh")}"
+    user_data_replace_on_change = "true"
+    key_name = "Mumbai"
+    //iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
 }
 /*
 // Jenkins-Slave
@@ -160,53 +154,12 @@ resource "aws_instance" "jenkins-slave" {
     tags = { Name = "jenkins-slave" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
+    security_groups = [ aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
-    key_name = aws_key_pair.web-key.id
+    key_name = "Mumbai"
+    user_data = "${file("scripts/jenkins-slave.sh")}"
+    user_data_replace_on_change = "true"
     iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
-
-    connection {
-        type = "ssh"
-        host = self.public_ip
-        user = "ec2-user"
-       	private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    // private_key = file("~/.ssh/id_rsa")		    // for local/laptop
-}
-
-    provisioner "file" {
-        source = "scripts/user_creation.sh"
-        destination = "/home/ec2-user/user_creation.sh"
-	}
-	
-	provisioner "file" {
-        source = "scripts/jenkins-slave.sh"
-        destination = "/home/ec2-user/jenkins-slave.sh"
-    }
-
-    provisioner "file" {
-        source = "scripts/id_rsa.pub"
-        destination = "/home/ec2-user/id_rsa.pub"
-    }
-
-    provisioner "file" {
-        source = "scripts/id_rsa"
-        destination = "/home/ec2-user/id_rsa"
-    }
-
-    provisioner "remote-exec" {
-        inline = [
-            // Installing required packages
-            "sudo yum install dos2unix -y",
-            
-			// Changing Permissions
-			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-slave.sh",
-			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/jenkins-slave.sh",
-            
-			// Execute both files one-by-one
-			"sudo sh /home/ec2-user/user_creation.sh",
-			"sudo sh /home/ec2-user/jenkins-slave.sh"
-        ]
-    }
 }
 
 // Ansible-Controller-Machine
@@ -214,52 +167,12 @@ resource "aws_instance" "ansible-CM" {
     tags = { Name = "ansible-CM" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
+    security_groups = [ aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
-    key_name = aws_key_pair.web-key.id
-
-    connection {
-        type = "ssh"
-        host = self.public_ip
-        user = "ec2-user"
-        private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    // private_key = file("~/.ssh/id_rsa")		    // for local/laptop
-}
-
-    provisioner "file" {
-        source = "scripts/user_creation.sh"
-        destination = "/home/ec2-user/user_creation.sh"
-	}
-	
-	provisioner "file" {
-        source = "scripts/ansible-CM.sh"
-        destination = "/home/ec2-user/ansible-CM.sh"
-    }
-
-    provisioner "file" {
-        source = "scripts/id_rsa.pub"
-        destination = "/home/ec2-user/id_rsa.pub"
-    }
-
-    provisioner "file" {
-        source = "scripts/id_rsa"
-        destination = "/home/ec2-user/id_rsa"
-    }
-
-    provisioner "remote-exec" {
-        inline = [
-            // Installing required packages
-            "sudo yum install dos2unix -y",
-            
-			// Changing Permissions
-			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/ansible-CM.sh",
-			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/ansible-CM.sh",
-            
-			// Execute both files one-by-one
-			"sudo sh /home/ec2-user/user_creation.sh",
-			"sudo sh /home/ec2-user/ansible-CM.sh"
-        ]
-    }
+    user_data = "${file("scripts/ansible-CM.sh")}"
+    user_data_replace_on_change = "true"
+    key_name = "Mumbai"
+    
 }
 
 // Ansible Node
@@ -267,46 +180,33 @@ resource "aws_instance" "ansible-node" {
     tags = { Name = "ansible-node" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
+    security_groups = [ aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
+    user_data = "${file("scripts/ansible-CM.sh")}"
+    user_data_replace_on_change = "true"
     key_name = aws_key_pair.web-key.id
-
-    connection {
-        type = "ssh"
-        host = self.public_ip
-        user = "ec2-user"
-	    private_key = file("scripts/id_rsa")		// for Executing from within AWS
-	    // private_key = file("~/.ssh/id_rsa")	    	// for local/laptop
-    }
-
-    provisioner "file" {
-        source = "scripts/user_creation.sh"
-        destination = "/home/ec2-user/user_creation.sh"
-	}
-
-    provisioner "file" {
-        source = "scripts/id_rsa.pub"
-        destination = "/home/ec2-user/id_rsa.pub"
-    }
-
-    provisioner "file" {
-        source = "scripts/id_rsa"
-        destination = "/home/ec2-user/id_rsa"
-    }
-
-    provisioner "remote-exec" {
-        inline = [
-            // Installing required packages
-            "sudo yum install dos2unix -y",
-            
-			// Changing Permissions
-			"sudo dos2unix /home/ec2-user/user_creation.sh /home/ec2-user/ansible-node.sh",
-			"sudo chmod +x /home/ec2-user/user_creation.sh /home/ec2-user/ansible-node.sh",
-            
-			// Execute both files one-by-one
-			"sudo sh /home/ec2-user/user_creation.sh",
-			"sudo sh /home/ec2-user/ansible-node.sh",
-            "sudo hostnamectl set-hostname ansible-node"
-        ]
-    }
 }*/
+
+// Nexus Server setup - hardcoded few properties need to change
+resource "aws_instance" "NexusServer" {
+    tags = { Name = "Nexus-Server" }
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
+    ami = "ami-060f2cb962e997969"   // Centos 7
+    security_groups = [ aws_security_group.ssh.id, aws_security_group.Nexus-SG.id ]
+    subnet_id = aws_subnet.Public-Subnet-2.id
+    user_data = "${file("scripts/nexus-setup.sh")}"
+    user_data_replace_on_change = "true"
+    key_name = "Mumbai"
+}
+
+// Sonar Server setup - hardcoded few properties need to change
+resource "aws_instance" "Sonar-Server" {
+    tags = { Name = "Sonar-Server" }
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
+    ami = "ami-05e00961530ae1b55"   // Ubuntu 22
+    security_groups = [ aws_security_group.ssh.id, aws_security_group.Sonar-SG.id ]
+    subnet_id = aws_subnet.Public-Subnet-2.id
+    user_data = "${file("scripts/sonar-setup.sh")}"
+    user_data_replace_on_change = "true"
+    key_name = "Mumbai"
+}

@@ -62,9 +62,9 @@ variable "instance_type" {
     description = "value"
     type = map(string)
     default = {
-      "dev" = "t2.micro"
-      "stage" = "t2.micro"
-      "prod" = "t2.micro"
+      "dev" = "t2.medium"
+      "stage" = "t2.medium"
+      "prod" = "t2.medium"
     }
 }
 
