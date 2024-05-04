@@ -137,10 +137,11 @@ resource "aws_dynamodb_table" "mytable" {
 }*/
 
 //Jenkins-Master
-resource "aws_instance" "jenkins-master" {
-    tags = { Name = "jenkins-master" }
+/*resource "aws_instance" "jenkins-master" {
+    tags = { Name = "Jenkins-Master" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
-    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
+    //ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
+    ami = "ami-044848f8685d5641c"           // AMI has jenkins installation configurations
     security_groups = [ aws_security_group.Jenkins-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
     user_data = "${file("scripts/jenkins-master.sh")}"
@@ -148,10 +149,10 @@ resource "aws_instance" "jenkins-master" {
     key_name = "Mumbai"
     //iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
 }
-/*
+
 // Jenkins-Slave
 resource "aws_instance" "jenkins-slave" {
-    tags = { Name = "jenkins-slave" }
+    tags = { Name = "Jenkins-Slave" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
     ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
     security_groups = [ aws_security_group.ssh.id ]
@@ -162,33 +163,8 @@ resource "aws_instance" "jenkins-slave" {
     iam_instance_profile = aws_iam_instance_profile.ec2_profile.id
 }
 
-// Ansible-Controller-Machine
-resource "aws_instance" "ansible-CM" {
-    tags = { Name = "ansible-CM" }
-    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
-    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.ssh.id ]
-    subnet_id = aws_subnet.Public-Subnet-1.id
-    user_data = "${file("scripts/ansible-CM.sh")}"
-    user_data_replace_on_change = "true"
-    key_name = "Mumbai"
-    
-}
-
-// Ansible Node
-resource "aws_instance" "ansible-node" {
-    tags = { Name = "ansible-node" }
-    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
-    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
-    security_groups = [ aws_security_group.ssh.id ]
-    subnet_id = aws_subnet.Public-Subnet-2.id
-    user_data = "${file("scripts/ansible-CM.sh")}"
-    user_data_replace_on_change = "true"
-    key_name = aws_key_pair.web-key.id
-}*/
-
 // Nexus Server setup - hardcoded few properties need to change
-resource "aws_instance" "NexusServer" {
+/*resource "aws_instance" "Nexus-Server" {
     tags = { Name = "Nexus-Server" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
     ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
@@ -207,6 +183,32 @@ resource "aws_instance" "Sonar-Server" {
     security_groups = [ aws_security_group.ssh.id, aws_security_group.Sonar-SG.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
     user_data = "${file("scripts/sonar-setup.sh")}"
+    user_data_replace_on_change = "true"
+    key_name = "Mumbai"
+}*/
+
+// Ansible-Controller-Machine
+resource "aws_instance" "ansible-CM" {
+    tags = { Name = "Ansible-CM" }
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
+    security_groups = [ aws_security_group.ssh.id ]
+    subnet_id = aws_subnet.Public-Subnet-1.id
+    user_data = "${file("scripts/ansible-CM.sh")}"
+    user_data_replace_on_change = "true"
+    key_name = "Mumbai"
+    
+}
+
+// Ansible Node
+resource "aws_instance" "ansible-node" {
+    tags = { Name = "Ansible-Node" }
+    count = 3
+    instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
+    security_groups = [ aws_security_group.ssh.id ]
+    subnet_id = aws_subnet.Public-Subnet-2.id
+    user_data = "${file("scripts/ansible-CM.sh")}"
     user_data_replace_on_change = "true"
     key_name = "Mumbai"
 }
