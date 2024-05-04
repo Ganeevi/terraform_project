@@ -106,7 +106,7 @@ resource "aws_dynamodb_table" "mytable" {
 resource "aws_instance" "jenkins-master" {
     tags = { Name = "jenkins-master" }
     instance_type = lookup(var.instance_type, terraform.workspace, "t2.micro")
-    ami = lookup(var.ami_id, terraform.workspace, "ami-060f2cb962e997969")
+    ami = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
     security_groups = [ aws_security_group.web-SG.id, aws_security_group.ssh.id ]
     subnet_id = aws_subnet.Public-Subnet-1.id
     key_name = aws_key_pair.web-key.id
