@@ -1,4 +1,4 @@
-resource "aws_vpc" "myVPC" {
+/*resource "aws_vpc" "myVPC" {
     tags = { Name = "myVPC" }
     cidr_block = lookup(var.vpc_cidr, terraform.workspace, "10.0.0.0/16")
 }
@@ -83,7 +83,7 @@ resource "aws_key_pair" "web-key" {
     //public_key = file("~/.ssh/id_rsa.pub")		    // for local/laptop
 }
 
-/*resource "aws_ecr_repository" "this" {
+resource "aws_ecr_repository" "this" {
   name = repository_name_yuy
 }
 
@@ -100,7 +100,7 @@ resource "aws_dynamodb_table" "mytable" {
     name = "LockID"
     type = "S"
   }
-}*/
+}
 
 //Jenkins-Master
 resource "aws_instance" "jenkins-master" {
@@ -154,7 +154,7 @@ resource "aws_instance" "jenkins-master" {
         ]
     }
 }
-/*
+
 // Jenkins-Slave
 resource "aws_instance" "jenkins-slave" {
     tags = { Name = "jenkins-slave" }
