@@ -44,7 +44,7 @@ resource "aws_route_table_association" "public-rt-asso-2" {
 }
 
 resource "aws_security_group" "ssh" {
-    tags = { Name = "ssh-enabled" }
+    tags = { Name = "SSH" }
     vpc_id = aws_vpc.myVPC.id
     ingress {
         from_port = 22
