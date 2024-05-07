@@ -87,3 +87,13 @@ variable "ami_ubuntu" {
       "prod" = "ami-0e001c9271cf7f3b9"
     }
 }
+
+variable "instance_sonarqube" {
+    description = "value"
+    type = map(string)
+    default = {
+      "dev" = "t2.medium"
+      "stage" = "t2.medium"
+      "prod" = "t2.medium"
+    }
+}
