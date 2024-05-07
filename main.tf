@@ -178,7 +178,7 @@ resource "aws_instance" "jenkins-slave" {
 // Sonar Server setup - hardcoded few properties need to change
 resource "aws_instance" "Sonar-Server" {
     tags = { Name = "Sonar-Server" }
-    instance_type = lookup(var.instance_type, terraform.workspace, "t2.medium")
+    instance_type = lookup(var.instance_sonarqube, terraform.workspace, "t2.medium")
     ami = lookup(var.ami_ubuntu , terraform.workspace, "ami-05e00961530ae1b55")   // Ubuntu 22
     security_groups = [ aws_security_group.ssh.id, aws_security_group.Sonar-SG.id ]
     subnet_id = aws_subnet.Public-Subnet-2.id
