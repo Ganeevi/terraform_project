@@ -1,8 +1,8 @@
 resource "aws_vpc" "myVPC" {
-  tags       = { Name = "myVPC" }
-  cidr_block = lookup(var.vpc_cidr, terraform.workspace, "10.0.0.0/16")
-  instance_tenancy = "default"
-  enable_dns_support = "true"
+  tags                 = { Name = "myVPC" }
+  cidr_block           = lookup(var.vpc_cidr, terraform.workspace, "10.0.0.0/16")
+  instance_tenancy     = "default"
+  enable_dns_support   = "true"
   enable_dns_hostnames = "true"
 }
 
