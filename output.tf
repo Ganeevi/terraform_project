@@ -1,4 +1,4 @@
-/*output "jenkins-master" {
+output "jenkins-master" {
     value = [ aws_instance.jenkins-master.public_ip, aws_instance.jenkins-master.private_ip ]
 }
 
@@ -13,7 +13,7 @@ output "Nexus-Server" {
 output "Sonar-Server" {
     value = [aws_instance.Sonar-Server.public_ip, aws_instance.Sonar-Server.private_ip]
   
-}*/
+}
 
 output "ansible-CM" {
   value = [aws_instance.ansible-CM.public_ip, aws_instance.ansible-CM.private_ip]

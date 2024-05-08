@@ -13,7 +13,7 @@ resource "aws_instance" "jenkins-master" {
 }
 
 // Jenkins-Slave
-/*resource "aws_instance" "jenkins-slave" {
+resource "aws_instance" "jenkins-slave" {
   tags                        = { Name = "Jenkins-Slave" }
   instance_type               = lookup(var.instance_type, terraform.workspace, "t2.micro")
   ami                         = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
@@ -73,4 +73,4 @@ resource "aws_instance" "ansible-node" {
   user_data                   = file("scripts/ansible-CM.sh")
   user_data_replace_on_change = "true"
   key_name                    = "Mumbai"
-}*/
+}

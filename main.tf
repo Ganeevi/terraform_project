@@ -116,7 +116,7 @@ resource "aws_key_pair" "web-key" {
   public_key = file("scripts/id_rsa.pub")
 }
 
-resource "aws_ecr_repository" "this" {
+/*resource "aws_ecr_repository" "this" {
   name = repository_name_yuy
 }
 
@@ -133,4 +133,4 @@ resource "aws_dynamodb_table" "mytable" {
     name = "LockID"
     type = "S"
   }
-}
+}*/
