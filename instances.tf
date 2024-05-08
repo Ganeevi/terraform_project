@@ -1,5 +1,5 @@
 
-//Jenkins-Master
+/*//Jenkins-Master
 resource "aws_instance" "jenkins-master" {
   tags                        = { Name = "Jenkins-Master" }
   instance_type               = lookup(var.instance_type, terraform.workspace, "t2.medium")
@@ -73,4 +73,4 @@ resource "aws_instance" "ansible-node" {
   user_data                   = file("scripts/ansible-CM.sh")
   user_data_replace_on_change = "true"
   key_name                    = "Mumbai"
-}
+}*/
