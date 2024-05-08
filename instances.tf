@@ -1,5 +1,28 @@
+/*resource "aws_ebs_volume" "ebs-1a" {
+  tags              = { Name = "ebs-1a" }
+  availability_zone = lookup(var.Public-Subnet-1, terraform.workspace, "ap-south-1a")
+  size              = 10
+}
 
-/*//Jenkins-Master
+resource "aws_ebs_volume" "ebs-1b" {
+  tags              = { Name = "ebs-1b" }
+  availability_zone = lookup(var.Public-Subnet-2, terraform.workspace, "ap-south-1b")
+  size              = 10
+}
+
+resource "aws_volume_attachment" "attach-ebs-1a" {
+  device_name = "/dev/xvdh"
+  volume_id   = aws_ebs_volume.ebs-1a.id
+  instance_id = aws_instance.jenkins-master.id
+}
+
+resource "aws_volume_attachment" "attach-ebs-1b" {
+  device_name = "/dev/xvdh"
+  volume_id   = aws_ebs_volume.ebs-1b.id
+  instance_id = aws_instance.jenkins-slave.id
+}
+
+//Jenkins-Master
 resource "aws_instance" "jenkins-master" {
   tags                        = { Name = "Jenkins-Master" }
   instance_type               = lookup(var.instance_type, terraform.workspace, "t2.medium")
@@ -65,7 +88,7 @@ resource "aws_instance" "ansible-CM" {
 // Ansible Node
 resource "aws_instance" "ansible-node" {
   tags                        = { Name = "Ansible-Node" }
-  count                       = 3
+  //count                     = 3
   instance_type               = lookup(var.instance_type, terraform.workspace, "t2.micro")
   ami                         = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
   security_groups             = [aws_security_group.ssh.id]
