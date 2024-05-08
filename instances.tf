@@ -82,7 +82,6 @@ resource "aws_instance" "ansible-CM" {
   user_data                   = file("scripts/ansible-CM.sh")
   user_data_replace_on_change = "true"
   key_name                    = "Mumbai"
-
 }
 
 // Ansible Node
@@ -93,7 +92,7 @@ resource "aws_instance" "ansible-node" {
   ami                         = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
   security_groups             = [aws_security_group.ssh.id]
   subnet_id                   = aws_subnet.Public-Subnet-2.id
-  user_data                   = file("scripts/ansible-CM.sh")
+  user_data                   = file("scripts/ansible-node.sh")
   user_data_replace_on_change = "true"
   key_name                    = "Mumbai"
 }*/
