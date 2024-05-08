@@ -16,9 +16,9 @@ output "Sonar-Server" {
 }*/
 
 output "ansible-CM" {
-    value = [ aws_instance.ansible-CM.public_ip, aws_instance.ansible-CM.private_ip ]
+  value = [aws_instance.ansible-CM.public_ip, aws_instance.ansible-CM.private_ip]
 }
 
 output "ansible-node" {
-    value = [ aws_instance.ansible-node.*.public_ip, aws_instance.ansible-node.*.private_ip ]
+  value = [aws_instance.ansible-node.*.public_ip, aws_instance.ansible-node.*.private_ip]
 }
