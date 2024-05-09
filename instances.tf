@@ -96,3 +96,15 @@ resource "aws_instance" "ansible-node" {
   user_data_replace_on_change = "true"
   key_name                    = "Mumbai"
 }*/
+
+// Docker-Engine
+resource "aws_instance" "docker-enginer" {
+  tags                        = { Name = "Docker" }
+  instance_type               = lookup(var.instance_type, terraform.workspace, "t2.micro")
+  ami                         = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-060f2cb962e997969")
+  security_groups             = [aws_security_group.All-Open.id]
+  subnet_id                   = aws_subnet.Public-Subnet-2.id
+  key_name                    = "Mumbai"
+  user_data                   = file("scripts/docker-engine.sh")
+  user_data_replace_on_change = "true"
+}
