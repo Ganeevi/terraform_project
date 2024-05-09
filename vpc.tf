@@ -114,6 +114,29 @@ resource "aws_security_group" "Sonar-SG" {
   }
 }
 
+resource "aws_security_group" "All-Open" {
+  tags   = { Name = "All-Open" }
+  vpc_id = aws_vpc.myVPC.id
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 /*resource "aws_key_pair" "web-key" {
   tags       = { Name = "web-key" }
   public_key = file("scripts/id_rsa.pub")
