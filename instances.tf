@@ -95,7 +95,7 @@ resource "aws_instance" "ansible-node" {
   user_data                   = file("scripts/ansible-node.sh")
   user_data_replace_on_change = "true"
   key_name                    = "Mumbai"
-}*/
+}
 
 // Docker-Engine
 resource "aws_instance" "docker-enginer" {
@@ -107,4 +107,14 @@ resource "aws_instance" "docker-enginer" {
   key_name                    = "Mumbai"
   user_data                   = file("scripts/docker-engine.sh")
   user_data_replace_on_change = "true"
+}*/
+
+
+resource "aws_instance" "Web-Server" {
+  tags            = { Name = "Web-Server" }
+  instance_type   = lookup(var.instance_type, terraform.workspace, "t2.micro")
+  ami             = "ami-05839228e96a46460"
+  security_groups = [aws_security_group.Sonar-SG.id, aws_security_group.ssh.id]
+  subnet_id       = aws_subnet.Public-Subnet-2.id
+  key_name        = "Mumbai"
 }
