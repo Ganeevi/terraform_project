@@ -48,7 +48,7 @@ resource "aws_route_table_association" "public-rt-asso-2" {
 
 resource "aws_security_group" "ssh" {
   tags   = { Name = "SSH" }
-  name = "SSH - terraform"
+  name   = "SSH - terraform"
   vpc_id = aws_vpc.myVPC.id
   ingress {
     from_port   = 22
@@ -66,7 +66,7 @@ resource "aws_security_group" "ssh" {
 
 resource "aws_security_group" "Jenkins-SG" {
   tags   = { Name = "Jenkins-SG" }
-  name = "Jenkins-SG - terraform"
+  name   = "Jenkins-SG - terraform"
   vpc_id = aws_vpc.myVPC.id
   ingress {
     from_port   = 8080
@@ -84,7 +84,7 @@ resource "aws_security_group" "Jenkins-SG" {
 
 resource "aws_security_group" "Nexus-SG" {
   tags   = { Name = "Nexus-SG" }
-  name = "Nexus-SG - terraform"
+  name   = "Nexus-SG - terraform"
   vpc_id = aws_vpc.myVPC.id
   ingress {
     from_port   = 8081
@@ -100,15 +100,15 @@ resource "aws_security_group" "Nexus-SG" {
   }
 }
 
-resource "aws_security_group" "Sonar-SG" {
-  tags   = { Name = "Sonar-SG" }
-  name = "Sonar-SG - terraform"
+resource "aws_security_group" "Web" {
+  tags   = { Name = "Web" }
+  name   = "Web - terraform"
   vpc_id = aws_vpc.myVPC.id
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["49.207.52.76/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     from_port   = 0
@@ -120,7 +120,7 @@ resource "aws_security_group" "Sonar-SG" {
 
 resource "aws_security_group" "All-Open" {
   tags   = { Name = "All-Open" }
-  name = "All-Open - terraform"
+  name   = "All-Open - terraform"
   vpc_id = aws_vpc.myVPC.id
   ingress {
     from_port   = 0

@@ -65,7 +65,7 @@ resource "aws_instance" "Sonar-Server" {
   tags                        = { Name = "Sonar-Server" }
   instance_type               = lookup(var.instance_sonarqube, terraform.workspace, "t2.medium")
   ami                         = lookup(var.ami_ubuntu, terraform.workspace, "ami-05e00961530ae1b55") // Ubuntu 22
-  security_groups             = [aws_security_group.ssh.id, aws_security_group.Sonar-SG.id]
+  security_groups             = [aws_security_group.ssh.id, aws_security_group.Web.id]
   subnet_id                   = aws_subnet.Public-Subnet-2.id
   user_data                   = file("scripts/sonar-setup.sh")
   user_data_replace_on_change = "true"
@@ -109,12 +109,11 @@ resource "aws_instance" "docker-enginer" {
   user_data_replace_on_change = "true"
 }*/
 
-
 resource "aws_instance" "Web-Server" {
   tags            = { Name = "Web-Server" }
   instance_type   = lookup(var.instance_type, terraform.workspace, "t2.micro")
   ami             = "ami-05839228e96a46460"
-  security_groups = [aws_security_group.Sonar-SG.id, aws_security_group.ssh.id]
+  security_groups = [aws_security_group.Web.id, aws_security_group.ssh.id]
   subnet_id       = aws_subnet.Public-Subnet-2.id
   key_name        = "Mumbai"
 }
