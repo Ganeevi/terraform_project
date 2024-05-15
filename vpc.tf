@@ -11,12 +11,13 @@ resource "aws_internet_gateway" "myIGW" {
   vpc_id = aws_vpc.myVPC.id
 }
 
+// Public Subnet
 resource "aws_subnet" "Public-Subnet-1" {
   tags                    = { Name = "Public-Subnet-1" }
   vpc_id                  = aws_vpc.myVPC.id
   availability_zone       = lookup(var.Public-Subnet-1, terraform.workspace, "ap-south-1a")
   map_public_ip_on_launch = true
-  cidr_block              = lookup(var.subnet-1_cidr, terraform.workspace, "10.0.10.0/24")
+  cidr_block              = lookup(var.Public-subnet-1_cidr, terraform.workspace, "10.0.10.0/24")
 }
 
 resource "aws_subnet" "Public-Subnet-2" {
@@ -24,7 +25,7 @@ resource "aws_subnet" "Public-Subnet-2" {
   vpc_id                  = aws_vpc.myVPC.id
   availability_zone       = lookup(var.Public-Subnet-2, terraform.workspace, "ap-south-1b")
   map_public_ip_on_launch = true
-  cidr_block              = lookup(var.subnet-2_cidr, terraform.workspace, "10.0.20.0/24")
+  cidr_block              = lookup(var.Public-subnet-2_cidr, terraform.workspace, "10.0.20.0/24")
 }
 
 resource "aws_route_table" "Public-RT" {
@@ -36,7 +37,7 @@ resource "aws_route_table" "Public-RT" {
   }
 }
 
-resource "aws_route_table_association" "public-rt-asso" {
+resource "aws_route_table_association" "public-rt-asso-1" {
   subnet_id      = aws_subnet.Public-Subnet-1.id
   route_table_id = aws_route_table.Public-RT.id
 }
@@ -46,6 +47,53 @@ resource "aws_route_table_association" "public-rt-asso-2" {
   route_table_id = aws_route_table.Public-RT.id
 }
 
+// Private Subnet
+/*resource "aws_subnet" "Private-Subnet-1" {
+  tags                    = { Name = "Private-Subnet-1" }
+  vpc_id                  = aws_vpc.myVPC.id
+  availability_zone       = lookup(var.Private-Subnet-1, terraform.workspace, "ap-south-1a")
+  map_public_ip_on_launch = false
+  cidr_block              = lookup(var.Private-subnet-1_cidr, terraform.workspace, "10.0.30.0/24")
+}
+
+resource "aws_subnet" "Private-Subnet-2" {
+  tags                    = { Name = "Private-Subnet-2" }
+  vpc_id                  = aws_vpc.myVPC.id
+  availability_zone       = lookup(var.Private-Subnet-2, terraform.workspace, "ap-south-1b")
+  cidr_block              = lookup(var.Private-subnet-2_cidr, terraform.workspace, "10.0.40.0/24")
+  map_public_ip_on_launch = false
+}
+
+resource "aws_eip" "myEIP" {
+  tags = { Name = "myEIP" }
+}
+
+resource "aws_nat_gateway" "myNAT" {
+  tags = { Name = "myNAT"}
+  allocation_id = aws_eip.myEIP.id
+  subnet_id = aws_subnet.Public-Subnet-1.id  
+}
+
+resource "aws_route_table" "Private-RT" {
+  tags   = { Name = "Private-RT" }
+  vpc_id = aws_vpc.myVPC.id
+  route {
+    nat_gateway_id =  aws_nat_gateway.myNAT.id
+    cidr_block = "0.0.0.0/0"
+  }
+}
+
+resource "aws_route_table_association" "Private-rt-asso-1" {
+  subnet_id      = aws_subnet.Private-Subnet-1.id
+  route_table_id = aws_route_table.Private-RT.id
+}
+
+resource "aws_route_table_association" "Private-rt-asso-2" {
+  subnet_id      = aws_subnet.Private-Subnet-2.id
+  route_table_id = aws_route_table.Private-RT.id
+}*/
+
+// Security Groups
 resource "aws_security_group" "ssh" {
   tags   = { Name = "SSH" }
   name   = "SSH - terraform"

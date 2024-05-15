@@ -38,7 +38,7 @@ variable "Public-Subnet-2" {
   }
 }
 
-variable "subnet-1_cidr" {
+variable "Public-subnet-1_cidr" {
   description = "value"
   type        = map(string)
   default = {
@@ -48,13 +48,53 @@ variable "subnet-1_cidr" {
   }
 }
 
-variable "subnet-2_cidr" {
+variable "Public-subnet-2_cidr" {
   description = "value"
   type        = map(string)
   default = {
     "dev"   = "10.0.20.0/24"
     "stage" = "172.16.20.0/24"
     "prod"  = "192.168.20.0/24"
+  }
+}
+
+variable "Private-Subnet-1" {
+  description = "value"
+  type        = map(string)
+  default = {
+    "dev"   = "ap-south-1a"
+    "stage" = "ap-northeast-1a"
+    "prod"  = "us-east-1a"
+  }
+}
+
+variable "Private-Subnet-2" {
+  description = "value"
+  type        = map(string)
+  default = {
+    "dev"   = "ap-south-1b"
+    "stage" = "ap-northeast-1c"
+    "prod"  = "us-east-1b"
+  }
+}
+
+variable "Private-subnet-1_cidr" {
+  description = "value"
+  type        = map(string)
+  default = {
+    "dev"   = "10.0.30.0/24"
+    "stage" = "172.16.30.0/24"
+    "prod"  = "192.168.30.0/24"
+  }
+}
+
+variable "Private-subnet-2_cidr" {
+  description = "value"
+  type        = map(string)
+  default = {
+    "dev"   = "10.0.40.0/24"
+    "stage" = "172.16.40.0/24"
+    "prod"  = "192.168.40.0/24"
   }
 }
 
