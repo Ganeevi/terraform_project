@@ -1,4 +1,4 @@
-output "jenkins-master" {
+/*output "jenkins-master" {
   value = [aws_instance.jenkins-master.public_ip, aws_instance.jenkins-master.private_ip]
 }
 
@@ -22,3 +22,11 @@ output "ansible-CM" {
 output "ansible-node" {
   value = [aws_instance.ansible-node.*.public_ip, aws_instance.ansible-node.*.private_ip]
 }
+
+output "docker" {
+  value = [ aws_instance.docker-enginer.public_ip, aws_instance.docker-enginer.private_ip ]
+}
+
+output "Web-Server" {
+  value = [ aws_instance.Web-Server.public_ip, aws_instance.Web-Server.private_ip ]
+}*/
