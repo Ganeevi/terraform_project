@@ -1,4 +1,4 @@
-# Creating a Launch Template
+/*# Creating a Launch Template
 resource "aws_launch_template" "Web_launch_template" {
   tags                 = { Name = "Web_launch_template" }
   name                 = "Web_launch_template"
@@ -86,4 +86,4 @@ resource "aws_lb_listener_rule" "rule_b" {
       values = ["/images*"]
     }
   }
-}
+}*/
