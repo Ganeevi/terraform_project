@@ -1,4 +1,4 @@
-resource "aws_ebs_volume" "ebs-1a" {
+/*resource "aws_ebs_volume" "ebs-1a" {
   tags              = { Name = "ebs-1a" }
   availability_zone = lookup(var.Public-Subnet-1, terraform.workspace, "us-east-1a")
   size              = 10
@@ -117,4 +117,4 @@ resource "aws_instance" "Web-Server" {
   security_groups = [aws_security_group.Web.id, aws_security_group.ssh.id]
   subnet_id       = aws_subnet.Public-Subnet-2.id
   key_name        = lookup(var.key_name, terraform.workspace, "America")
-}
+}*/
