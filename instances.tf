@@ -109,12 +109,26 @@ resource "aws_instance" "docker-enginer" {
   user_data_replace_on_change = "true"
 }
 
-//Only for Amazon-EC2 AMI
+//Web-server for Amazon-EC2 AMI
 resource "aws_instance" "Web-Server" {
-  tags            = { Name = "Web-Server" }
-  instance_type   = lookup(var.instance_type, terraform.workspace, "t2.micro")
-  ami             = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-04ff98ccbfa41c9ad")
-  security_groups = [aws_security_group.Web.id, aws_security_group.ssh.id]
-  subnet_id       = aws_subnet.Public-Subnet-2.id
-  key_name        = lookup(var.key_name, terraform.workspace, "America")
+  tags                        = { Name = "Web-Server-Amazon-Linux-2" }
+  instance_type               = lookup(var.instance_type, terraform.workspace, "t2.micro")
+  ami                         = lookup(var.ami_id_amazon-linux-2, terraform.workspace, "ami-04ff98ccbfa41c9ad")
+  security_groups             = [aws_security_group.Web.id, aws_security_group.ssh.id]
+  subnet_id                   = aws_subnet.Public-Subnet-1.id
+  user_data                   = file("scripts/Web.sh")
+  user_data_replace_on_change = "true"
+  key_name                    = lookup(var.key_name, terraform.workspace, "America")
+}
+
+//Web-server for Ubuntu
+resource "aws_instance" "Web-Server-Ubuntu" {
+  tags                        = { Name = "Web-Server-Ubuntu" }
+  instance_type               = lookup(var.instance_type, terraform.workspace, "t2.micro")
+  ami                         = lookup(var.ami_ubuntu, terraform.workspace, "ami-0e001c9271cf7f3b9")
+  security_groups             = [aws_security_group.Web.id, aws_security_group.ssh.id]
+  subnet_id                   = aws_subnet.Public-Subnet-2.id
+  user_data                   = file("scripts/Web.sh")
+  user_data_replace_on_change = "true"
+  key_name                    = lookup(var.key_name, terraform.workspace, "America")
 }*/
