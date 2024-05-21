@@ -48,7 +48,7 @@ resource "aws_route_table_association" "public-rt-asso-2" {
 }
 
 // Private Subnet
-resource "aws_subnet" "Private-Subnet-1" {
+/*resource "aws_subnet" "Private-Subnet-1" {
   tags                    = { Name = "Private-Subnet-1" }
   vpc_id                  = aws_vpc.myVPC.id
   availability_zone       = lookup(var.Private-Subnet-1, terraform.workspace, "us-east-1a")
@@ -91,7 +91,7 @@ resource "aws_route_table_association" "Private-rt-asso-1" {
 resource "aws_route_table_association" "Private-rt-asso-2" {
   subnet_id      = aws_subnet.Private-Subnet-2.id
   route_table_id = aws_route_table.Private-RT.id
-}
+}*/
 
 // Security Groups
 resource "aws_security_group" "ssh" {
