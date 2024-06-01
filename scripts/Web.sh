@@ -1,38 +1,37 @@
 #!/bin/bash
 
-package1=httpd
-package2="apache2 wget unzip"
-package3=apache2
-
-URL1=https://www.free-css.com/assets/files/free-css-templates/download/page296/healet.zip
-URL2=https://www.free-css.com/assets/files/free-css-templates/download/page296/oxer.zip
-
-sudo rm -rf /tmp/package/*
+#Clean up
+rm -rf /tmp/package/*
 sudo rm -rf /var/www/html/*
 
-yum --help
+#Package details for both Amazon-linux-2 and Ubuntu
+package1="httpd"
+package2="apache2 wget unzip"
+
+URL_httpd=https://www.free-css.com/assets/files/free-css-templates/download/page296/healet.zip
+URL_apache=https://www.free-css.com/assets/files/free-css-templates/download/page296/oxer.zip
+
+yum --help $> /dev/null
 
 if [ $? -eq 0 ]
 then
-        echo "Installing 'Web-Server' on Amazon Linux 2"
-        sudo yum update
+        echo "Installing Packages on Amazon Linux 2"
+        yum update -y
         yum install -y $package1
-        systemctl start $package1
         mkdir -p /tmp/package
         cd /tmp/package
-        wget $URL1
+        wget $URL_httpd
         unzip healet.zip
         sudo mv healet-html/* /var/www/html/
-        systemctl restart $package1
+        systemctl restart httpd
 else
-        echo "Installing 'Apache 2' on Ubuntu"
-        apt update
+        echo "Installing Packages on Ubuntu"
+        apt update -y
         apt-get install -y $package2
-        systemctl start $package3
         mkdir -p /tmp/package
         cd /tmp/package
-        wget $URL2
+        wget $URL_apache
         unzip oxer.zip
         sudo mv oxer-html/* /var/www/html/
-        systemctl restart $package3
+        systemctl restart apache2
 fi
